@@ -1,13 +1,13 @@
 const express = require('express');
-const auth = require('../middleware/auth')
-
+const auth = require('../middleware/auth');
+const ObjectId = require('mongoose').Types.ObjectId;
 const Comment = require('../models/Comment');
 
 const router = express.Router();
 
 router.get('/', (req, res) => {
     if (req.query.post)
-        return Comment.find({post: new ObjectId(req.query.post)}).sort([['issuedAt', 1]])
+        return Comment.find({post: new ObjectId(req.query.post)}).populate('user').sort([['issuedAt', 1]])
             .then(comments => res.send(comments))
             .catch(() => res.sendStatus(500));
     Comment.find()
@@ -22,7 +22,7 @@ router.post('/', auth, (req, res) => {
 
     comment.save()
         .then(result => res.send(result))
-        .catch((error) => res.sendStatus(400).send(error));
+        .catch((error) => res.send(error));
 
 });
 

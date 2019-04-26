@@ -21,7 +21,7 @@ const upload = multer({storage});
 const router = express.Router();
 
 router.get('/', (req, res) => {
-    Post.find().populate('user')
+    Post.find().populate('user').sort([['issuedAt', -1]])
         .then(posts => res.send(posts))
         .catch(()=>res.sendStatus(500))
 });
@@ -37,16 +37,17 @@ router.get('/:id', (req, res) => {
 
 router.post('/', auth, upload.single('image'), (req, res) => {
     const postData = req.body;
-
     if (req.file) {
         postData.image = req.file.filename;
     }
+
+    postData.issuedAt = new Date().toISOString();
 
     const post = new Post(postData);
 
     post.save()
         .then(result => res.send(result))
-        .catch((error) => res.sendStatus(400).send(error));
+        .catch((error) => res.send(error));
 
 });
 
